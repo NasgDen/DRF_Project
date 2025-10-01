@@ -6,7 +6,7 @@ class Course(models.Model):
     """ Описание полей модель - курс """
 
     name = models.CharField(max_length=100, verbose_name="Название", help_text="Введите название курса")
-    image = models.ImageField(upload_to="media/", verbose_name="Превью", help_text="Загрузите картинку (превью)")
+    image = models.ImageField(upload_to="media/", verbose_name="Превью", help_text="Загрузите картинку (превью)", blank=True, null=True)
     description = models.TextField(verbose_name="Описание курса", help_text="Введите описание курса")
 
     class Meta:
@@ -22,8 +22,8 @@ class Lesson(models.Model):
 
     name = models.CharField(max_length=100, verbose_name="Название", help_text="Введите название урока")
     description = models.TextField(verbose_name="Описание урока", help_text="Введите описание урока")
-    image = models.ImageField(upload_to="media/", verbose_name="Превью", help_text="Загрузите картинку (превью)")
-    link_to_video = models.CharField(max_length=150, verbose_name="Ссылка на видео", help_text="Введите ссылку на видео")
+    image = models.ImageField(upload_to="media/", verbose_name="Превью", help_text="Загрузите картинку (превью)", blank=True, null=True)
+    link_to_video = models.URLField(max_length=150, verbose_name="Ссылка на видео", help_text="Введите ссылку на видео", blank=True, null=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name="Курс", help_text='Выберите курс', related_name='lesson')
 
     class Meta:
