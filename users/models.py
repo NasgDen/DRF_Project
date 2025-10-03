@@ -19,7 +19,7 @@ class User(AbstractUser):
     avatar = models.ImageField(upload_to="users/avatar/", blank=True, null=True)
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = []
+    REQUIRED_FIELDS = ["username"]
 
     class Meta:
         verbose_name = "Пользователь"
@@ -45,6 +45,6 @@ class Payments(models.Model):
         verbose_name_plural = "Платежи"
 
     def __str__(self):
-        return f"{self.user} оплатил {self.amount} за {self.paid_item}  {self.date}"
+        return f"{self.user} оплатил {self.amount} за {self.paid_item}  {self.date_payment}"
 
 

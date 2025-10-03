@@ -1,3 +1,28 @@
 from django.contrib import admin
 
-# Register your models here.
+from .models import User, Payments
+
+
+@admin.register(User)
+class UserAdmin(admin.ModelAdmin):
+    list_display = (
+        "email",
+        "username",
+        "phone",
+        "avatar",
+        "city",
+    )
+    list_filter = ("city",)
+
+
+@admin.register(Payments)
+class PaymentsAdmin(admin.ModelAdmin):
+    list_display = (
+        "user",
+        "date_payment",
+        "content_type",
+        "object_id",
+        "paid_item",
+        "method",
+        "amount",
+    )
