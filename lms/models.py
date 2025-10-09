@@ -1,5 +1,6 @@
 from symtable import Class
 
+from django.conf import settings
 from django.db import models
 
 from users.models import User
@@ -14,7 +15,7 @@ class Course(models.Model):
     )
     description = models.TextField(verbose_name="Описание курса", help_text="Введите описание курса")
     owner = models.ForeignKey(
-        User, on_delete=models.CASCADE, verbose_name="Владелец", help_text="Укажите владельца", related_name="сourse", blank=True, null=True
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Владелец", help_text="Укажите владельца", related_name="сourse", blank=True, null=True
     )
 
     class Meta:
@@ -40,7 +41,7 @@ class Lesson(models.Model):
         Course, on_delete=models.CASCADE, verbose_name="Курс", help_text="Выберите курс", related_name="lesson"
     )
     owner = models.ForeignKey(
-        User, on_delete=models.CASCADE, verbose_name="Владелец", help_text="Укажите владельца", related_name="lesson", blank=True, null=True
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Владелец", help_text="Укажите владельца", related_name="lesson", blank=True, null=True
     )
 
     class Meta:
