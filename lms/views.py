@@ -3,9 +3,10 @@ from rest_framework.decorators import permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from lms.permissions import IsModerator, IsOwner
+
 from .models import Course, Lesson
 from .serializers import CourseSerializer, LessonSerializer
-from lms.permissions import IsModerator, IsOwner
 
 
 class CourseViewSet(viewsets.ModelViewSet):
