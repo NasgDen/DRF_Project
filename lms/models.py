@@ -62,3 +62,10 @@ class Lesson(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Subscription(models.Model):
+    """ Описание полей модели - Подписка """
+
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Пользователи", related_name="subscription", help_text="Укажите пользователя", blank=True, null=True)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name="Курс", related_name="subscription", help_text="Укажите курс", blank=True, null=True)
