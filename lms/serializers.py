@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Course, Lesson
+from .models import Course, Lesson, Subscription
 from .validators import LinkVideoValidator
 
 
@@ -30,3 +30,8 @@ class CourseSerializer(serializers.ModelSerializer):
     def get_lessons_number(self, instance):
         """Функция подсчитывает количество уроков в курсе"""
         return Lesson.objects.filter(course=instance).count()
+
+class SubscriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Subscription
+        fields = "__all__"

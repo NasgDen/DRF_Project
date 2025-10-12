@@ -69,3 +69,10 @@ class Subscription(models.Model):
 
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="Пользователи", related_name="subscription", help_text="Укажите пользователя", blank=True, null=True)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, verbose_name="Курс", related_name="subscription", help_text="Укажите курс", blank=True, null=True)
+
+    class Meta:
+        verbose_name = "Подписка"
+        verbose_name_plural = "Подписки"
+
+    def __str__(self):
+        return self.course.name
