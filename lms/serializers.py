@@ -12,6 +12,7 @@ class LessonSerializer(serializers.ModelSerializer):
 
 
 class CourseSerializer(serializers.ModelSerializer):
+    subscription = serializers.SerializerMethodField()
     lessons_number = serializers.SerializerMethodField()
     lessons = LessonSerializer(source="lesson", many=True, read_only=True)
 
@@ -25,11 +26,16 @@ class CourseSerializer(serializers.ModelSerializer):
             "lessons",
             "lessons_number",
             "owner",
+            "subscription",
         )
 
     def get_lessons_number(self, instance):
         """Функция подсчитывает количество уроков в курсе"""
         return Lesson.objects.filter(course=instance).count()
+
+    def get_subscription(self, instance):
+        """Функция реализует вывод о подписки на курс """
+        return Subscription.objects.filter(course=instance).exists()
 
 class SubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
