@@ -1,3 +1,4 @@
+from django.contrib.admin.templatetags.admin_list import pagination
 from django.template.context_processors import request
 from rest_framework import generics, viewsets
 from rest_framework.decorators import permission_classes
@@ -9,6 +10,7 @@ from rest_framework.views import APIView
 from lms.permissions import IsModerator, IsOwner
 
 from .models import Course, Lesson, Subscription
+from .pagination import CoursePagination, LessonPagination
 from .serializers import CourseSerializer, LessonSerializer, SubscriptionSerializer
 
 
@@ -17,6 +19,7 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     queryset = Course.objects.all()
     serializer_class = CourseSerializer
+    pagination_class = CoursePagination
 
     def get_permissions(self):
         if self.action == "create":
@@ -41,6 +44,12 @@ class CourseViewSet(viewsets.ModelViewSet):
             queryset = Course.objects.all()
         else:
             queryset = Course.objects.filter(owner=self.request.user)
+
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
         serializer = CourseSerializer(queryset, many=True)
         return Response(serializer.data)
 
@@ -61,6 +70,7 @@ class LessonsListApiView(generics.ListAPIView):
 
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
+    pagination_class = LessonPagination
 
     def get_queryset(self):
         if IsModerator().has_permission(self.request, self):
