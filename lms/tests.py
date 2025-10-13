@@ -2,7 +2,7 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from lms.models import Lesson, Course
+from lms.models import Lesson, Course, Subscription
 from users.models import User
 
 
@@ -94,6 +94,7 @@ class LessonTestCase(APITestCase):
         )
 
     def test_lesson_list(self):
+        """ Тест - Вывод уроков. """
         url = reverse("lms:lessons")
         response = self.client.get(url)
         data = response.json()
@@ -117,3 +118,51 @@ class LessonTestCase(APITestCase):
             status.HTTP_200_OK
         )
         self.assertEqual(data, result)
+
+
+
+class SubscriptionTestCase(APITestCase):
+
+    def setUp(self):
+        self.user = User.objects.create(email="test@mail.ru")
+        self.client.force_authenticate(user=self.user)
+        self.course = Course.objects.create(name="Python", description="Изучение языка программирования Python", owner=self.user)
+        self.lesson = Lesson.objects.create(name="Переменные", description="Изучение переменных", course=self.course, owner=self.user)
+
+
+    def test_subscription_add(self):
+        """ Тест - Добавление подписки. """
+        url = reverse("lms:subscription")
+        data = {
+            "course": self.course.pk,
+            "user": self.user.pk
+            }
+        response = self.client.post(url, data)
+        result = response.json()
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
+        )
+        self.assertEqual(
+            result.get("message"),
+            "подписка добавлена"
+        )
+
+    def test_subscription_delete(self):
+        """ Тест - Удаление подписки. """
+        url = reverse("lms:subscription")
+        Subscription.objects.create(course=self.course, user=self.user)
+        data = {
+            "course": self.course.pk,
+            "user": self.user.pk
+        }
+        response = self.client.post(url, data)
+        result = response.json()
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
+        )
+        self.assertEqual(
+            result.get("message"),
+            "подписка удалена"
+        )
