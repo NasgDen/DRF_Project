@@ -1,9 +1,11 @@
+from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from django.contrib.auth.models import Group
 
-from users.models import User
+from lms.models import Course, Lesson, Subscription
+from users.models import User, Payments
 
 
 class CourseTestCase(APITestCase):
@@ -111,6 +113,44 @@ class CourseTestCase(APITestCase):
         group, created = Group.objects.get_or_create(name="moderators")
         user = self.user
         group.user_set.add(user)
+        response = self.client.get(url)
+        data = response.json()
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
+        )
+        self.assertEqual(
+            data,
+            result
+        )
+
+
+class PaymentsTestCase(APITestCase):
+
+    def setUp(self):
+        self.user = User.objects.create(email="test@mail.ru")
+        self.client.force_authenticate(user=self.user)
+        self.course = Course.objects.create(name="Python", description="Изучение языка программирования Python",
+                                            owner=self.user)
+        self.lesson = Lesson.objects.create(name="Переменные", description="Изучение переменных", course=self.course,
+                                            owner=self.user)
+        self.subscription = Subscription.objects.create(course=self.course, user=self.user)
+
+    def test_payments_list(self):
+        """ Тест - Вывод платежей """
+
+        Payments.objects.create(user=self.user, date_payment="2025-01-01", content_type=ContentType.objects.get_for_model(self.course), object_id=self.course.pk, method="transfer", amount=10000)
+        url = reverse("users:payments")
+        result = [
+            {'id': 1,
+             'date_payment': '2025-01-01',
+             'object_id': self.course.pk,
+             'method': 'transfer',
+             'amount': '10000.00',
+             'user': self.user.pk,
+             'content_type': 6
+             }
+        ]
         response = self.client.get(url)
         data = response.json()
         self.assertEqual(
