@@ -166,3 +166,136 @@ class SubscriptionTestCase(APITestCase):
             result.get("message"),
             "подписка удалена"
         )
+
+
+class CourseTestCase(APITestCase):
+
+    def setUp(self):
+        self.user = User.objects.create(email="test@mail.ru")
+        self.client.force_authenticate(user=self.user)
+        self.course = Course.objects.create(name="Python", description="Изучение языка программирования Python",
+                                            owner=self.user)
+        self.lesson = Lesson.objects.create(name="Переменные", description="Изучение переменных", course=self.course,
+                                            owner=self.user)
+        self.subscription = Subscription.objects.create(course=self.course, user=self.user)
+
+    def test_course_detail(self):
+        """ Тест - детальный просмотр курса """
+        url = reverse("lms:course-detail", args=(self.course.pk,))
+        response = self.client.get(url)
+        data = response.json()
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
+        )
+        self.assertEqual(
+            data.get("name"),
+            self.course.name
+        )
+
+    def test_course_create(self):
+        """ Тест - создание курса """
+        url = reverse("lms:course-list")
+        data = {
+            "name": "test",
+            "description": "test description",
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_201_CREATED
+        )
+        self.assertEqual(
+            Course.objects.all().count(),
+            2
+        )
+
+    def test_course_patch(self):
+        """ Тест - Изменение курса. Patch запрос"""
+        url = reverse("lms:course-detail", args=(self.course.pk,))
+        data = {
+            "name": "test"
+        }
+        response = self.client.patch(url, data)
+        result = response.json()
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
+        )
+        self.assertEqual(
+            result.get("name"),
+            "test"
+        )
+
+    def test_course_put(self):
+        """ Тест - Изменение курса. Put запрос """
+        url = reverse("lms:course-detail", args=(self.course.pk,))
+        data = {
+            "name": "test",
+            "description": "test description"
+        }
+        response = self.client.put(url, data)
+        result = response.json()
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
+        )
+        self.assertEqual(
+            result.get("name"),
+            "test"
+        )
+        self.assertEqual(
+            result.get("description"),
+            "test description"
+        )
+
+    def test_course_delete(self):
+        """ Тест - Удаление курса. """
+        url = reverse("lms:course-detail", args=(self.course.pk,))
+        response = self.client.delete(url)
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_204_NO_CONTENT
+        )
+        self.assertEqual(
+            Course.objects.all().count(),
+            0
+        )
+
+    def test_course_list(self):
+        """ Тест - Вывод курсов """
+        url = reverse("lms:course-list")
+        response = self.client.get(url)
+        data = response.json()
+        result = {'count': 1,
+                  'next': None,
+                  'previous': None,
+                  'results': [
+                      {'id': self.course.pk,
+                       'name': self.course.name,
+                       'image': self.course.image,
+                       'description': self.course.description,
+                       'lessons': [
+                           {'id': self.lesson.pk,
+                            'name': self.lesson.name,
+                            'description': self.lesson.description,
+                            'image': self.lesson.image,
+                            'link_to_video': self.lesson.link_to_video,
+                            'course': self.course.pk,
+                            'owner': self.user.pk
+                            }
+                       ],
+                       'lessons_number': 1,
+                       'owner': self.user.pk,
+                       'subscription': True
+                       }
+                  ]
+                  }
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
+        )
+        self.assertEqual(
+            data,
+            result
+        )
