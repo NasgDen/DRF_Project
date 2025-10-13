@@ -1,3 +1,4 @@
+from django.template.context_processors import request
 from rest_framework import serializers
 
 from .models import Course, Lesson, Subscription
@@ -29,13 +30,18 @@ class CourseSerializer(serializers.ModelSerializer):
             "subscription",
         )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(self, *args, **kwargs)
+        self.request = kwargs.get("context").get("request")
+
     def get_lessons_number(self, instance):
         """Функция подсчитывает количество уроков в курсе"""
         return Lesson.objects.filter(course=instance).count()
 
     def get_subscription(self, instance):
         """Функция реализует вывод о подписки на курс """
-        return Subscription.objects.filter(course=instance).exists()
+        print(self.request.user)
+        return Subscription.objects.filter(course=instance, user=self.request.user).exists()
 
 class SubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
