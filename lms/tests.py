@@ -1,3 +1,119 @@
-from django.test import TestCase
+from django.urls import reverse
+from rest_framework import status
+from rest_framework.test import APITestCase
 
-# Create your tests here.
+from lms.models import Lesson, Course
+from users.models import User
+
+
+class LessonTestCase(APITestCase):
+
+    def setUp(self):
+        self.user = User.objects.create(email="test@mail.ru")
+        self.client.force_authenticate(user=self.user)
+        self.course = Course.objects.create(name="Python", description="Изучение языка программирования Python", owner=self.user)
+        self.lesson = Lesson.objects.create(name="Переменные", description="Изучение переменных", course=self.course, owner=self.user)
+
+
+    def test_lesson_retrive(self):
+        """ Тест - детальный просмотр урока """
+        url = reverse("lms:lesson_retrieve", args=(self.lesson.pk,))
+        response = self.client.get(url)
+        data = response.json()
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
+        )
+        self.assertEqual(
+            data.get("name"),
+            self.lesson.name
+        )
+        self.assertEqual(
+            data.get("description"),
+            self.lesson.description
+        )
+
+    def test_lesson_create(self):
+        """ Тест - Создание урока """
+        url = reverse("lms:lesson_create")
+        data = {
+            "name": "Функции",
+            "description": "Основы функций",
+            "course": self.course.pk,
+            "owner": self.user.pk
+        }
+        response = self.client.post(url, data)
+        data = response.json()
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_201_CREATED
+        )
+        self.assertEqual(
+            Lesson.objects.all().count(),
+            2
+        )
+
+    def test_lesson_update_patch(self):
+        """ Тест - Изменение урока. Patch запрос"""
+        url = reverse("lms:lesson_update", args=(self.lesson.pk,))
+        data = {
+            "name": "Функция test",
+        }
+        response = self.client.patch(url, data)
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
+        )
+
+    def test_lesson_update_put(self):
+        """ Тест - Изменение урока. Put запрос"""
+        url = reverse("lms:lesson_update", args=(self.lesson.pk,))
+        data = {
+            "name": "Рекурсия",
+            "description": "Основы функций",
+            "course": self.course.pk,
+            "owner": self.user.pk
+        }
+        response = self.client.patch(url, data)
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
+        )
+
+    def test_lesson_delete(self):
+        """ Тест - Удаление урока. """
+        url = reverse("lms:lesson_delete", args=(self.lesson.pk,))
+        response = self.client.delete(url)
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_204_NO_CONTENT
+        )
+        self.assertEqual(
+            Lesson.objects.all().count(),
+            0
+        )
+
+    def test_lesson_list(self):
+        url = reverse("lms:lessons")
+        response = self.client.get(url)
+        data = response.json()
+        result = {
+            'count': 1,
+            'next': None,
+            'previous': None,
+            'results': [
+                {'id': self.lesson.pk,
+                 'name': self.lesson.name,
+                 'description': self.lesson.description,
+                 'image': self.lesson.image,
+                 'link_to_video': self.lesson.link_to_video,
+                 'course': self.course.pk,
+                 'owner': self.user.pk
+                 }
+            ]
+        }
+        self.assertEqual(
+            response.status_code,
+            status.HTTP_200_OK
+        )
+        self.assertEqual(data, result)
