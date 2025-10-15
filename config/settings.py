@@ -123,3 +123,5 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
 }
+
+API_KEY = os.getenv("API_KEY")

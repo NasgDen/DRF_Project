@@ -5,7 +5,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from .apps import UsersConfig
-from .views import PaymentsView, UserViewSet
+from .views import PaymentsView, UserViewSet, PaymentsCreate
 
 app_name = UsersConfig.name
 
@@ -14,6 +14,7 @@ router.register(r"user", UserViewSet, basename="user")
 
 urlpatterns = [
     path("payments/", PaymentsView.as_view(), name="payments"),
+    path("payments/create/", PaymentsCreate.as_view(), name="payments_create"),
     path("login/", TokenObtainPairView.as_view(permission_classes=(AllowAny,)), name="login"),
     path("token/refresh/", TokenRefreshView.as_view(permission_classes=(AllowAny,)), name="token_refresh"),
 ] + router.urls

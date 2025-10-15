@@ -39,13 +39,17 @@ class Payments(models.Model):
         verbose_name="Пользователь",
         help_text="Выберите пользователя",
         related_name="payment",
+        blank=True,
+        null=True
     )
-    date_payment = models.DateField()
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
+    date_payment = models.DateField(verbose_name="Дата оплаты", auto_now=True)
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, verbose_name="Продукт")
+    object_id = models.PositiveIntegerField(verbose_name="id Продукта")
     paid_item = GenericForeignKey("content_type", "object_id")
-    method = models.CharField(max_length=10, choices=PAYMENT_METHODS)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    method = models.CharField(max_length=10, choices=PAYMENT_METHODS, verbose_name="Метод оплаты")
+    amount = models.PositiveIntegerField(verbose_name="Стоимость")
+    session_id = models.CharField(max_length=600, verbose_name="id сессии на оплату для stripe", blank=True, null=True)
+    link =  models.CharField(max_length=600, verbose_name="Ссылка на оплату", blank=True, null=True)
 
     class Meta:
         verbose_name = "Платежи"

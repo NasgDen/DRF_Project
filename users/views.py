@@ -4,11 +4,13 @@ from rest_framework.decorators import permission_classes
 from rest_framework.filters import OrderingFilter
 from rest_framework.permissions import AllowAny
 
+from lms.models import Course, Lesson
 from lms.permissions import IsModerator
 
 from .models import Payments, User
 from .permissions import IsOwner
 from .serializers import PaymentsSerializer, UserOwnerSerializer, UserSerializer
+from .services import create_product, create_price, create_checkout_session
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -46,3 +48,27 @@ class PaymentsView(generics.ListAPIView):
     filter_backends = [OrderingFilter, DjangoFilterBackend]
     ordering_fields = ["date_payment"]
     filterset_fields = ["method", "content_type"]
+
+
+class PaymentsCreate(generics.CreateAPIView):
+    """ Класс реализует интерфейс для создания платежа """
+
+    queryset = Payments.objects.all()
+    serializer_class = PaymentsSerializer
+
+    def perform_create(self, serializer):
+        payment = serializer.save()
+        payment.user = self.request.user
+        if str(payment.content_type) == "Lms | Курс":
+            product = Course.objects.filter(pk=payment.object_id).values("name")
+            product_name = "Курс " + product[0].get("name")
+            print(product_name)
+        else:
+            product = Lesson.objects.filter(pk=payment.object_id).values("name")
+            product_name = "Урок " + product[0].get("name")
+        product_stripe = create_product(product_name)
+        price = create_price(payment.amount, product_stripe)
+        session_id, payment_link = create_checkout_session(price)
+        payment.session_id = session_id
+        payment.link = payment_link
+        payment.save()
