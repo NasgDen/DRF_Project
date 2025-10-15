@@ -9,7 +9,7 @@ class LessonSerializer(serializers.ModelSerializer):
     class Meta:
         model = Lesson
         fields = "__all__"
-        validator = [LinkVideoValidator(field='link_to_video')]
+        validator = [LinkVideoValidator(field="link_to_video")]
 
 
 class CourseSerializer(serializers.ModelSerializer):
@@ -35,9 +35,10 @@ class CourseSerializer(serializers.ModelSerializer):
         return Lesson.objects.filter(course=instance).count()
 
     def get_subscription(self, instance):
-        """Функция реализует вывод о подписки на курс """
-        user = self.context['request'].user
+        """Функция реализует вывод о подписки на курс"""
+        user = self.context["request"].user
         return Subscription.objects.filter(course=instance, user=user).exists()
+
 
 class SubscriptionSerializer(serializers.ModelSerializer):
     class Meta:

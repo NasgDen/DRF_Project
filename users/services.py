@@ -4,7 +4,7 @@ from config import settings
 
 
 def create_product(product):
-    """ Создание продукта в stripe """
+    """Создание продукта в stripe"""
 
     stripe.api_key = settings.API_KEY
     prod = stripe.Product.create(name=product)
@@ -12,7 +12,7 @@ def create_product(product):
 
 
 def create_price(amount, product):
-    """ Создание цены продукта в stripe """
+    """Создание цены продукта в stripe"""
 
     stripe.api_key = settings.API_KEY
     price = stripe.Price.create(
@@ -22,8 +22,9 @@ def create_price(amount, product):
     )
     return price
 
+
 def create_checkout_session(price):
-    """ Создание сессии на оплату продукта в stripe """
+    """Создание сессии на оплату продукта в stripe"""
 
     stripe.api_key = settings.API_KEY
     session = stripe.checkout.Session.create(
@@ -32,6 +33,7 @@ def create_checkout_session(price):
         mode="payment",
     )
     return session.get("id"), session.get("url")
+
 
 def retrieve_checkout_session(session_id):
     stripe.api_key = settings.API_KEY

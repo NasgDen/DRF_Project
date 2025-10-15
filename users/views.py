@@ -10,7 +10,7 @@ from lms.permissions import IsModerator
 from .models import Payments, User
 from .permissions import IsOwner
 from .serializers import PaymentsSerializer, UserOwnerSerializer, UserSerializer
-from .services import create_product, create_price, create_checkout_session, retrieve_checkout_session
+from .services import create_checkout_session, create_price, create_product, retrieve_checkout_session
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -51,7 +51,7 @@ class PaymentsView(generics.ListAPIView):
 
 
 class PaymentsCreate(generics.CreateAPIView):
-    """ Класс реализует интерфейс для создания платежа """
+    """Класс реализует интерфейс для создания платежа"""
 
     queryset = Payments.objects.all()
     serializer_class = PaymentsSerializer
@@ -72,8 +72,9 @@ class PaymentsCreate(generics.CreateAPIView):
         payment.link = payment_link
         payment.save()
 
+
 class PaymentsUpdate(generics.UpdateAPIView):
-    """ Класс реализует интерфейс для проверки статуса платежа """
+    """Класс реализует интерфейс для проверки статуса платежа"""
 
     queryset = Payments.objects.all()
     serializer_class = PaymentsSerializer
