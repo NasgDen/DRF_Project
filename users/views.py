@@ -10,7 +10,7 @@ from lms.permissions import IsModerator
 from .models import Payments, User
 from .permissions import IsOwner
 from .serializers import PaymentsSerializer, UserOwnerSerializer, UserSerializer
-from .services import create_product, create_price, create_checkout_session
+from .services import create_product, create_price, create_checkout_session, retrieve_checkout_session
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -62,7 +62,6 @@ class PaymentsCreate(generics.CreateAPIView):
         if str(payment.content_type) == "Lms | Курс":
             product = Course.objects.filter(pk=payment.object_id).values("name")
             product_name = "Курс " + product[0].get("name")
-            print(product_name)
         else:
             product = Lesson.objects.filter(pk=payment.object_id).values("name")
             product_name = "Урок " + product[0].get("name")
@@ -71,4 +70,16 @@ class PaymentsCreate(generics.CreateAPIView):
         session_id, payment_link = create_checkout_session(price)
         payment.session_id = session_id
         payment.link = payment_link
+        payment.save()
+
+class PaymentsUpdate(generics.UpdateAPIView):
+    """ Класс реализует интерфейс для проверки статуса платежа """
+
+    queryset = Payments.objects.all()
+    serializer_class = PaymentsSerializer
+
+    def perform_update(self, serializer):
+        payment = serializer.save()
+        status, payment_link = retrieve_checkout_session(payment.session_id)
+        payment.status = status
         payment.save()

@@ -32,3 +32,8 @@ def create_checkout_session(price):
         mode="payment",
     )
     return session.get("id"), session.get("url")
+
+def retrieve_checkout_session(session_id):
+    stripe.api_key = settings.API_KEY
+    session = stripe.checkout.Session.retrieve(session_id)
+    return session.get("payment_status"), session.get("url")

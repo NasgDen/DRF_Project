@@ -6,6 +6,7 @@ from .models import Payments, User
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     list_display = (
+        "id",
         "email",
         "username",
         "phone",
@@ -18,6 +19,7 @@ class UserAdmin(admin.ModelAdmin):
 @admin.register(Payments)
 class PaymentsAdmin(admin.ModelAdmin):
     list_display = (
+        "id",
         "user",
         "date_payment",
         "content_type",

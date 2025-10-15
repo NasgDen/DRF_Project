@@ -50,6 +50,7 @@ class Payments(models.Model):
     amount = models.PositiveIntegerField(verbose_name="Стоимость")
     session_id = models.CharField(max_length=600, verbose_name="id сессии на оплату для stripe", blank=True, null=True)
     link =  models.CharField(max_length=600, verbose_name="Ссылка на оплату", blank=True, null=True)
+    status = models.CharField(max_length=150, verbose_name="Статус оплаты", blank=True, null=True)
 
     class Meta:
         verbose_name = "Платежи"
