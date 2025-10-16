@@ -1,18 +1,19 @@
 from django.contrib.admin.templatetags.admin_list import pagination
 from django.template.context_processors import request
 from rest_framework import generics, viewsets
-from rest_framework.decorators import permission_classes
+from rest_framework.decorators import permission_classes, action
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from yaml import serialize
 
 from lms.permissions import IsModerator, IsOwner
 
 from .models import Course, Lesson, Subscription
 from .pagination import CoursePagination, LessonPagination
 from .serializers import CourseSerializer, LessonSerializer, SubscriptionSerializer
-from .tasks import celery_test_work
+from .tasks import send_email_subscription
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -38,7 +39,6 @@ class CourseViewSet(viewsets.ModelViewSet):
         return [permission() for permission in self.permission_classes]
 
     def perform_create(self, serializer):
-        celery_test_work.delay(1, 2)
         serializer.save(owner=self.request.user)
 
     def list(self, request, *args, **kwargs):
@@ -55,6 +55,9 @@ class CourseViewSet(viewsets.ModelViewSet):
         serializer = CourseSerializer(queryset, many=True)
         return Response(serializer.data)
 
+    def perform_update(self, serializer):
+        serializer.save()
+        print("Обновление курса")
 
 class LessonCreateApiView(generics.CreateAPIView):
     """Класс реализует интерфейс для создания урока"""
