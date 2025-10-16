@@ -12,6 +12,7 @@ from lms.permissions import IsModerator, IsOwner
 from .models import Course, Lesson, Subscription
 from .pagination import CoursePagination, LessonPagination
 from .serializers import CourseSerializer, LessonSerializer, SubscriptionSerializer
+from .tasks import celery_test_work
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -37,6 +38,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         return [permission() for permission in self.permission_classes]
 
     def perform_create(self, serializer):
+        celery_test_work.delay(1, 2)
         serializer.save(owner=self.request.user)
 
     def list(self, request, *args, **kwargs):
