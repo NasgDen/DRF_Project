@@ -27,6 +27,7 @@ class CourseSerializer(serializers.ModelSerializer):
             "lessons",
             "lessons_number",
             "owner",
+            "last_update_date",
             "subscription",
         )
 

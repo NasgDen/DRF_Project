@@ -1,12 +1,13 @@
 from django.contrib.admin.templatetags.admin_list import pagination
 from django.template.context_processors import request
+from django.utils import timezone
 from rest_framework import generics, viewsets
 from rest_framework.decorators import permission_classes, action
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from yaml import serialize
+# from yaml import serialize
 
 from lms.permissions import IsModerator, IsOwner
 
@@ -56,8 +57,13 @@ class CourseViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
     def perform_update(self, serializer):
-        serializer.save()
-        print("Обновление курса")
+        """Функция отправки письма при обновлении курса"""
+        course = serializer.save()
+        last_update_date = course.last_update_date
+        send_email_subscription.delay(course.pk, last_update_date)
+        course.last_update_date = timezone.now()
+        course.save()
+
 
 class LessonCreateApiView(generics.CreateAPIView):
     """Класс реализует интерфейс для создания урока"""

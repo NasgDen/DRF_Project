@@ -1,9 +1,6 @@
-from symtable import Class
-
 from django.conf import settings
 from django.db import models
-
-from users.models import User
+from django.utils import timezone
 
 
 class Course(models.Model):
@@ -23,6 +20,7 @@ class Course(models.Model):
         blank=True,
         null=True,
     )
+    last_update_date = models.DateTimeField(verbose_name="Дата последнего обновления курса", default=timezone.now)
 
     class Meta:
         verbose_name = "Курс"

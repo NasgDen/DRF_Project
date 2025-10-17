@@ -11,6 +11,7 @@ class CourseAdmin(admin.ModelAdmin):
         "image",
         "description",
         "owner",
+        "last_update_date",
     )
     list_filter = ("name",)
 
