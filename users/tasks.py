@@ -5,6 +5,7 @@ from django.utils import timezone
 
 from users.models import User
 
+
 @shared_task
 def check_users_by_last_login_date():
     """Функция проверяет пользователей по дате последнего входа"""

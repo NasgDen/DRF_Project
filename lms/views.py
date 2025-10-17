@@ -1,13 +1,9 @@
-from django.contrib.admin.templatetags.admin_list import pagination
-from django.template.context_processors import request
 from django.utils import timezone
 from rest_framework import generics, viewsets
-from rest_framework.decorators import permission_classes, action
 from rest_framework.generics import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-# from yaml import serialize
 
 from lms.permissions import IsModerator, IsOwner
 

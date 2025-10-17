@@ -136,9 +136,9 @@ CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
 
 CELERY_BEAT_SCHEDULE = {
-    'check_users_by_last_login_date': {
-        'task': 'users.tasks.check_users_by_last_login_date',
-        'schedule': timedelta(minutes=1),
+    "check_users_by_last_login_date": {
+        "task": "users.tasks.check_users_by_last_login_date",
+        "schedule": timedelta(days=1),
     },
 }
 
