@@ -1,0 +1,119 @@
+[
+{
+    "model": "users.user",
+    "pk": 2,
+    "fields": {
+        "password": "12345",
+        "last_login": null,
+        "is_superuser": false,
+        "username": "admin",
+        "first_name": "",
+        "last_name": "",
+        "is_staff": true,
+        "is_active": true,
+        "date_joined": "2025-10-02T13:55:45.517Z",
+        "email": "admin@mail.ru",
+        "phone": null,
+        "city": "Magnitogorsk",
+        "avatar": "",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "users.user",
+    "pk": 3,
+    "fields": {
+        "password": "pbkdf2_sha256$1000000$GeaDqf84nQDscUTPrYSdRh$hi8YnJLE+u2DwaCr9LqfXYOWnHStbKatQNvdezKVsow=",
+        "last_login": "2025-10-03T12:28:03.068Z",
+        "is_superuser": true,
+        "username": "super",
+        "first_name": "",
+        "last_name": "",
+        "is_staff": true,
+        "is_active": true,
+        "date_joined": "2025-10-03T12:20:43.242Z",
+        "email": "super@mail.ru",
+        "phone": null,
+        "city": null,
+        "avatar": "",
+        "groups": [],
+        "user_permissions": []
+    }
+},
+{
+    "model": "users.payments",
+    "pk": 2,
+    "fields": {
+        "user": 2,
+        "date_payment": "2025-10-01",
+        "content_type": 7,
+        "object_id": 2,
+        "method": "transfer",
+        "amount": "50000.00"
+    }
+},
+{
+    "model": "users.payments",
+    "pk": 3,
+    "fields": {
+        "user": 2,
+        "date_payment": "2025-09-01",
+        "content_type": 8,
+        "object_id": 4,
+        "method": "transfer",
+        "amount": "3000.00"
+    }
+},
+{
+    "model": "lms.course",
+    "pk": 2,
+    "fields": {
+        "name": "Python",
+        "image": "",
+        "description": "Курс по Python"
+    }
+},
+{
+    "model": "lms.course",
+    "pk": 3,
+    "fields": {
+        "name": "Java",
+        "image": "",
+        "description": "Курс по Jva"
+    }
+},
+{
+    "model": "lms.lesson",
+    "pk": 2,
+    "fields": {
+        "name": "Функции",
+        "description": "Функции в Python",
+        "image": "",
+        "link_to_video": null,
+        "course": 2
+    }
+},
+{
+    "model": "lms.lesson",
+    "pk": 3,
+    "fields": {
+        "name": "Переменные",
+        "description": "переменные в Python",
+        "image": "",
+        "link_to_video": null,
+        "course": 2
+    }
+},
+{
+    "model": "lms.lesson",
+    "pk": 4,
+    "fields": {
+        "name": "Переменные",
+        "description": "переменные в Java",
+        "image": "",
+        "link_to_video": null,
+        "course": 3
+    }
+}
+]
