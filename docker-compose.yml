@@ -1,0 +1,90 @@
+services:
+  api_lms:
+    container_name: lms
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: sh -c "python manage.py migrate
+      && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/api
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    networks:
+      - default
+
+  # Создание Postgres Service
+  db:
+    image: postgres:17
+    container_name: postgres_db
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${USER}
+      POSTGRES_PASSWORD: ${PASSWORD}
+      POSTGRES_DB: ${NAME}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready -U POSTGRES_USER -d POSTGRES_DB"]
+      interval: 10s
+      retries: 5
+    networks:
+      - default
+
+  # Создание Redis Service
+  redis:
+    image: redis
+    container_name: redis_proj
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/redis-data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      retries: 5
+    networks:
+      - default
+
+  # Создание Celery Worker Service
+  celery_worker:
+    build: .
+    command: celery -A config worker -l INFO
+    volumes:
+      - .:/app
+    depends_on:
+      redis:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - CELERY_BROKER_URL=CELERY_BROKER_URL
+    networks:
+      - default
+
+  # Создание Celery Beat Service
+  celery_beat:
+    build: .
+    command: celery -A config beat -l INFO
+    volumes:
+      - .:/app
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - CELERY_BROKER_URL=CELERY_BROKER_URL
+    networks:
+      - default
+
+volumes:
+  postgres_data:
+  redis-data:
