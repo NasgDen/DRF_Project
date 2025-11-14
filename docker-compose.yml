@@ -13,6 +13,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
     env_file:
       - .env
     networks:
@@ -33,7 +35,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "pg_isready -U POSTGRES_USER -d POSTGRES_DB"]
+      test: ["CMD", "pg_isready", "-U", "${USER}", "-d", "${NAME}"]
       interval: 10s
       retries: 5
     networks:
