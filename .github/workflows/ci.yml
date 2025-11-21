@@ -43,6 +43,9 @@ jobs:
           curl -sSl https://install.python-poetry.org | python3 -
           echo "export PATH=\"$HOME/.local/bin:$PATH\""  >> $GITHUB_ENV
 
+      - name: Install dependencies
+        run: poetry install
+
       - name: Run migrations
         run: poetry run python manage.py migrate
 
