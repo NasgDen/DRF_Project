@@ -1,0 +1,34 @@
+name: DRF CI
+
+on: [push, pull_request]
+
+jobs:
+  runs-on: ubuntu-latest
+
+  steps:
+    - name: Check out code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.13"
+
+    - name: Cache Poetry
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pypoetry
+        key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+        restory-keys: |
+          ${{ runner.os }}-poetry-
+
+    - name: Install poetry
+      run: |
+        curl -sSl https://install.python-poetry.org | python3 -
+        echo "export PATH=\"$HOME/.local/bin:$PATH\""  >> $GITHUB_ENV
+
+    - name: Run migrations
+      run: poetry run python manage.py migrate
+
+    - name: Run test
+      run: poetry run python manage.py test
