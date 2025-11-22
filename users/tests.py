@@ -1,11 +1,9 @@
 from django.contrib.auth.models import Group
-from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from lms.models import Course, Lesson, Subscription
-from users.models import Payments, User
+from users.models import User
 
 
 class CourseTestCase(APITestCase):
