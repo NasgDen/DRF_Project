@@ -105,22 +105,17 @@ jobs:
     needs: test
 
     steps:
-      - name: Check out code
-        uses: actions/checkout@v3
 
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: Copy project files to server
-        run: |
-          rsync -avz --exclude '__pycache__' . ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}
-
       - name: Create .env and start docker
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
             cd ${{ secrets.DEPLOY_DIR }}
+            git clone -b ${{ github.ref }} git@github.com:NasgDen/DRF_Project.git
             echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" > .env
             echo "DEBUG=${{ secrets.DEBUG }}" > .env
             echo "NAME=${{ secrets.NAME }}" > .env
