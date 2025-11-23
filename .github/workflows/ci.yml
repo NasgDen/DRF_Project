@@ -113,6 +113,7 @@ jobs:
       - name: Create .env and start docker
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+            mkdir ${{ secrets.DEPLOY_DIR }}
             cd ${{ secrets.DEPLOY_DIR }}
             git clone git@github.com:NasgDen/DRF_Project.git
             echo \"SECRET_KEY=${{ secrets.SECRET_KEY }}\" > .env
