@@ -100,23 +100,6 @@ jobs:
           PORT: ${{ secrets.PORT }}
         run: poetry run python manage.py test
 
-  build:
-    runs-on: ubuntu-latest
-    needs: test
-
-    steps:
-      - name: Check out code
-        uses: actions/checkout@v3
-
-      - name: Log in to Docker Hub
-        run: echo ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
-
-      - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/api_lms:${{ github.sha }} .
-
-      - name: Push Docker image to Docker Hub
-        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/api_lms:${{ github.sha }}
-
   deploy:
     runs-on: ubuntu-latest
     needs: build
@@ -127,11 +110,31 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: Deploy to Server
+      - name: Copy project file to server
+        run: |
+          rsync -avz --exclude '__pycache__' . ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}
+
+      - name: Create .env and start docker
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/api_lms:${{ github.sha }}
-            docker stop api_lms || true
-            docker rm api_lms || true
-            docker run -d --name api_lms -p 80:8000 ${{ secrets.DOCKER_HUB_USERNAME }}/api_lms:${{ github.sha }}
+            cd ${{ secrets.DEPLOY_DIR }}
+            echo \"SECRET_KEY=${{ secrets.SECRET_KEY }}\" > .env
+            echo \"DEBUG=${{ secrets.DEBUG }}\" > .env
+            echo \"NAME=${{ secrets.NAME }}\" > .env
+            echo \"PASSWORD=${{ secrets.PASSWORD }}\" > .env
+            echo \"HOST=${{ secrets.HOST }}\" > .env
+            echo \"PORT=${{ secrets.PORT }}\" > .env
+            echo \"API_KEY=${{ secrets.API_KEY }}\" > .env
+            echo \"CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }}\" > .env
+            echo \"CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }}\" > .env
+            echo \"EMAIL_BACKEND=${{ secrets.EMAIL_BACKEND }}\" > .env
+            echo \"EMAIL_HOST=${{ secrets.EMAIL_HOST }}\" > .env
+            echo \"EMAIL_PORT=${{ secrets.EMAIL_PORT }}\" > .env
+            echo \"EMAIL_USE_TLS=${{ secrets.EMAIL_USE_TLS }}\" > .env
+            echo \"EMAIL_USE_SSL=${{ secrets.EMAIL_USE_SSL }}\" > .env
+            echo \"EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}\" > .env
+            echo \"EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}\" > .env
+            echo \"DEFAULT_FROM_EMAIL=${{ secrets.DEFAULT_FROM_EMAIL }}\" > .env
+            docker-compose down
+            docker-compose up -d --build
           EOF
