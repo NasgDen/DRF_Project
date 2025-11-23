@@ -110,29 +110,31 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
+      - name: Copy project files to server
+        run: |
+          rsync -avz --exclude '__pycache__' . ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}
+
       - name: Create .env and start docker
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
-            mkdir ${{ secrets.DEPLOY_DIR }}
             cd ${{ secrets.DEPLOY_DIR }}
-            git clone git@github.com:NasgDen/DRF_Project.git
-            echo \"SECRET_KEY=${{ secrets.SECRET_KEY }}\" > .env
-            echo \"DEBUG=${{ secrets.DEBUG }}\" > .env
-            echo \"NAME=${{ secrets.NAME }}\" > .env
-            echo \"PASSWORD=${{ secrets.PASSWORD }}\" > .env
-            echo \"HOST=${{ secrets.HOST }}\" > .env
-            echo \"PORT=${{ secrets.PORT }}\" > .env
-            echo \"API_KEY=${{ secrets.API_KEY }}\" > .env
-            echo \"CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }}\" > .env
-            echo \"CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }}\" > .env
-            echo \"EMAIL_BACKEND=${{ secrets.EMAIL_BACKEND }}\" > .env
-            echo \"EMAIL_HOST=${{ secrets.EMAIL_HOST }}\" > .env
-            echo \"EMAIL_PORT=${{ secrets.EMAIL_PORT }}\" > .env
-            echo \"EMAIL_USE_TLS=${{ secrets.EMAIL_USE_TLS }}\" > .env
-            echo \"EMAIL_USE_SSL=${{ secrets.EMAIL_USE_SSL }}\" > .env
-            echo \"EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}\" > .env
-            echo \"EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}\" > .env
-            echo \"DEFAULT_FROM_EMAIL=${{ secrets.DEFAULT_FROM_EMAIL }}\" > .env
+            echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" > .env
+            echo "DEBUG=${{ secrets.DEBUG }}" > .env
+            echo "NAME=${{ secrets.NAME }}" > .env
+            echo "PASSWORD=${{ secrets.PASSWORD }}" > .env
+            echo "HOST=${{ secrets.HOST }}" > .env
+            echo "PORT=${{ secrets.PORT }}" > .env
+            echo "API_KEY=${{ secrets.API_KEY }}" > .env
+            echo "CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }}" > .env
+            echo "CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }}" > .env
+            echo "EMAIL_BACKEND=${{ secrets.EMAIL_BACKEND }}" > .env
+            echo "EMAIL_HOST=${{ secrets.EMAIL_HOST }}" > .env
+            echo "EMAIL_PORT=${{ secrets.EMAIL_PORT }}" > .env
+            echo "EMAIL_USE_TLS=${{ secrets.EMAIL_USE_TLS }}" > .env
+            echo "EMAIL_USE_SSL=${{ secrets.EMAIL_USE_SSL }}" > .env
+            echo "EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}" > .env
+            echo "EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}" > .env
+            echo "DEFAULT_FROM_EMAIL=${{ secrets.DEFAULT_FROM_EMAIL }}" > .env
             docker-compose down
             docker-compose up -d --build
           EOF
