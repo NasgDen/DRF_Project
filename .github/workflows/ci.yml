@@ -113,7 +113,7 @@ jobs:
 
       - name: Copy project file server
         run: |
-          rsync -avz --exclude "__pycache__" " ssh -o StrictHostKeyChecking=no" . ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}
+          rsync . ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}
 
       - name: Create .env and start docker
         run: |
