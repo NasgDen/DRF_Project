@@ -130,6 +130,10 @@ jobs:
       - name: Create .env and start docker
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+            pwd
+            ls -lf
+            echo $GITHUB_WORKSPACE
+            rsync . ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}
             cd ${{ secrets.DEPLOY_DIR }}
             echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
             echo "DEBUG=${{ secrets.DEBUG }}" >> .env
