@@ -120,15 +120,6 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_KEY }}
 
-      - name: Print current dir
-        run: pwd
-
-      - name: List file of dir
-        run: ls -lf
-
-      - name: Print GITHUB_WORKSPACE
-        run: echo $GITHUB_WORKSPACE
-
       - name: Copy project file server
         run: |
           scp -r -o "StrictHostKeyChecking=no" . ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}
