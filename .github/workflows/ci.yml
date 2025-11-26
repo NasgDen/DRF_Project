@@ -85,7 +85,7 @@ jobs:
           USER: ${{ secrets.USER }}
           NAME: ${{ secrets.NAME }}
           PASSWORD: ${{ secrets.PASSWORD }}
-          HOST: ${{ secrets.HOST }}
+          HOST: ${{ secrets.HOST_TEST }}
           PORT: ${{ secrets.PORT }}
           CORS_ALLOWED_ORIGINS: ${{ secrets.CORS_ALLOWED_ORIGINS }}
           CSRF_TRUSTED_ORIGINS: ${{ secrets.CSRF_TRUSTED_ORIGINS }}
@@ -99,7 +99,7 @@ jobs:
           USER: ${{ secrets.USER }}
           NAME: ${{ secrets.NAME }}
           PASSWORD: ${{ secrets.PASSWORD }}
-          HOST: ${{ secrets.HOST }}
+          HOST: ${{ secrets.HOST_TEST }}
           PORT: ${{ secrets.PORT }}
           CORS_ALLOWED_ORIGINS: ${{ secrets.CORS_ALLOWED_ORIGINS }}
           CSRF_TRUSTED_ORIGINS: ${{ secrets.CSRF_TRUSTED_ORIGINS }}
