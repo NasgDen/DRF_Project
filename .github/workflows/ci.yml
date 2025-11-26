@@ -1,0 +1,155 @@
+name: DRF CI
+
+on: [push, pull_request]
+
+jobs:
+
+  lint:
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.13"
+
+      - name: Cache Poetry
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pypoetry
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+          restory-keys: |
+            ${{ runner.os }}-poetry-
+
+      - name: Install poetry
+        run: |
+          curl -sSl https://install.python-poetry.org | python3 -
+          echo "export PATH=\"$HOME/.local/bin:$PATH\""  >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: poetry install --no-root
+
+      - name: Run linter
+        run: poetry run flake8 .
+
+  test:
+
+    runs-on: ubuntu-latest
+    needs: lint
+    services:
+      db:
+        image: postgres:17
+        env:
+          POSTGRES_USER: ${{ secrets.USER }}
+          POSTGRES_PASSWORD: ${{ secrets.PASSWORD }}
+          POSTGRES_DB: ${{ secrets.NAME }}
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.13"
+
+      - name: Cache Poetry
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pypoetry
+          key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+          restory-keys: |
+            ${{ runner.os }}-poetry-
+
+      - name: Install poetry
+        run: |
+          curl -sSl https://install.python-poetry.org | python3 -
+          echo "export PATH=\"$HOME/.local/bin:$PATH\""  >> $GITHUB_ENV
+
+      - name: Install dependencies
+        run: poetry install --no-root
+
+      - name: Run migrations
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          DEBUG: ${{ secrets.DEBUG }}
+          USER: ${{ secrets.USER }}
+          NAME: ${{ secrets.NAME }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+          HOST: ${{ secrets.HOST_TEST }}
+          PORT: ${{ secrets.PORT }}
+          CORS_ALLOWED_ORIGINS: ${{ secrets.CORS_ALLOWED_ORIGINS }}
+          CSRF_TRUSTED_ORIGINS: ${{ secrets.CSRF_TRUSTED_ORIGINS }}
+          CORS_ALLOW_ALL_ORIGINS: ${{ secrets.CORS_ALLOW_ALL_ORIGINS }}
+        run: poetry run python manage.py migrate
+
+      - name: Run test
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          DEBUG: ${{ secrets.DEBUG }}
+          USER: ${{ secrets.USER }}
+          NAME: ${{ secrets.NAME }}
+          PASSWORD: ${{ secrets.PASSWORD }}
+          HOST: ${{ secrets.HOST_TEST }}
+          PORT: ${{ secrets.PORT }}
+          CORS_ALLOWED_ORIGINS: ${{ secrets.CORS_ALLOWED_ORIGINS }}
+          CSRF_TRUSTED_ORIGINS: ${{ secrets.CSRF_TRUSTED_ORIGINS }}
+          CORS_ALLOW_ALL_ORIGINS: ${{ secrets.CORS_ALLOW_ALL_ORIGINS }}
+        run: poetry run python manage.py test
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_KEY }}
+
+      - name: Copy project file server
+        run: |
+          scp -r -o "StrictHostKeyChecking=no" . ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }}:${{ secrets.DEPLOY_DIR }}
+
+      - name: Create .env and start docker
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ secrets.SSH_USER }}@${{ secrets.SERVER_IP }} << 'EOF'
+            cd ${{ secrets.DEPLOY_DIR }}
+            rm -f .env
+            echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+            echo "DEBUG=${{ secrets.DEBUG }}" >> .env
+            echo "NAME=${{ secrets.NAME }}" >> .env
+            echo "USER=${{ secrets.USER }}" >> .env
+            echo "PASSWORD=${{ secrets.PASSWORD }}" >> .env
+            echo "HOST=${{ secrets.HOST }}" >> .env
+            echo "PORT=${{ secrets.PORT }}" >> .env
+            echo "API_KEY=${{ secrets.API_KEY }}" >> .env
+            echo "CELERY_BROKER_URL=${{ secrets.CELERY_BROKER_URL }}" >> .env
+            echo "CELERY_RESULT_BACKEND=${{ secrets.CELERY_RESULT_BACKEND }}" >> .env
+            echo "EMAIL_BACKEND=${{ secrets.EMAIL_BACKEND }}" >> .env
+            echo "EMAIL_HOST=${{ secrets.EMAIL_HOST }}" >> .env
+            echo "EMAIL_PORT=${{ secrets.EMAIL_PORT }}" >> .env
+            echo "EMAIL_USE_TLS=${{ secrets.EMAIL_USE_TLS }}" >> .env
+            echo "EMAIL_USE_SSL=${{ secrets.EMAIL_USE_SSL }}" >> .env
+            echo "EMAIL_HOST_USER=${{ secrets.EMAIL_HOST_USER }}" >> .env
+            echo "EMAIL_HOST_PASSWORD=${{ secrets.EMAIL_HOST_PASSWORD }}" >> .env
+            echo "DEFAULT_FROM_EMAIL=${{ secrets.DEFAULT_FROM_EMAIL }}" >> .env
+            echo "CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }}" >> .env
+            echo "CSRF_TRUSTED_ORIGINS=${{ secrets.CSRF_TRUSTED_ORIGINS }}" >> .env
+            echo "CORS_ALLOW_ALL_ORIGINS=${{ secrets.CORS_ALLOW_ALL_ORIGINS }}" >> .env
+            docker-compose down
+            docker-compose up -d --build
+          EOF
